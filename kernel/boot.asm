@@ -10,10 +10,10 @@ extern kernel_main
 
 start:
   cli
-  mov esp, stack_space + 8192
+  mov esp, stack_space + 0x4000
   call kernel_main
   hlt
 
 section .bss
-resb 8192
+resb 0x4000
 stack_space:

@@ -28,7 +28,7 @@ moss: $(OBJ)
 	$(LD) $(LDFLAGS) -o $@ $(OBJ)
 
 run: moss
-	qemu-system-i386 -kernel moss -d int
+	qemu-system-x86_64 -vga std -kernel moss -d int
 
 clean:
 	rm -rf $(BUILD_DIR)
