@@ -7,6 +7,6 @@ write_port:
 
 global read_port
 read_port:
-    mov dx, [esp + 4]
+    mov dx, [esp + 4] ; port
     in al, dx
     ret 

@@ -2,13 +2,15 @@
 
 void kernel_main(void)
 {
-    clear_vga_memory();
-
+    // initialize everything
     pic_init();
     keyboard_init();
     idt_init();
+    // enable the irq only after idt has a way to handle the interrupt
     pic_change_irq_status(KEYBOARD_IRQ, true);
-    init_special_keys();
+    init_tty();
+
+    // enable interrupts after initializing the IDT and PIC so they dont recieve them sooner
     asm volatile("sti");
 
     while (1) {
@@ -18,6 +20,6 @@ void kernel_main(void)
         char c = convert_scancode(scancode);
         if (!c) continue;
 
-        putc(c);
+        tty_write(&c, 1);
     }
 }

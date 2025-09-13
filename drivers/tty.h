@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include "../misc/ring_buffer.h"
 
 extern void write_port(unsigned short port, char value);
 
@@ -11,10 +12,9 @@ extern void write_port(unsigned short port, char value);
 
 typedef void (*key_handler_t)(void);
 
-void init_special_keys();
-void clear_vga_memory();
 char convert_scancode(unsigned char scancode);
-void putc(char c);
-void puts(const char *str);
+void init_tty();
+int tty_write(const char *str, int len);
+int tty_read(char *buf, int maxlen);
 
 #endif

@@ -15,10 +15,11 @@ static const char scancode_to_ascii_shift[128] = {
     'B','N','M','<','>','?',0,'*',0,' ',0
 };
 
+key_handler_t handlers[SCANCODE_MAX];
+static ring_buffer_t input_buffer;
 
 static int cursor_x = 0;
 static int cursor_y = 0;
-static int prev_vga_index = 0;
 static bool shift = false;
 
 void handle_shift_press(void)  { 
@@ -30,6 +31,7 @@ void handle_shift_release(void){
 }
 
 void handle_enter(void) { 
+    // could have done just memroy_index + 80 but this seems cleaner tbh
     cursor_y++; 
     cursor_x = 0;
 }
@@ -53,22 +55,11 @@ void handle_backspace() {
     }
 
     VGA_MEMORY[cursor_y * 80 + cursor_x] = 0;
-    VGA_MEMORY[cursor_y * 80 + cursor_x - 1] = (0x70 << 8) | (VGA_MEMORY[cursor_y * 80 + cursor_x - 1] & 0xFF);
-    prev_vga_index = cursor_y * 80 + cursor_x - 1;
-}
-
-key_handler_t handlers[SCANCODE_MAX];
-
-void init_special_keys() {
-    handlers[0x2A] = handle_shift_press;
-    handlers[0x36] = handle_shift_press;
-    handlers[0xAA] = handle_shift_release;
-    handlers[0xB6] = handle_shift_release;
-    handlers[0x1C] = handle_enter;
-    handlers[0x0E] = handle_backspace;
 }
 
 void clear_vga_memory() {
+    // just sets the entire vga memory too 0 and resets the cursor position
+    // effectively clearing it
     int i = 0;
 	while(i < 80 * 25) {
 		VGA_MEMORY[i] = 0;
@@ -78,24 +69,13 @@ void clear_vga_memory() {
     cursor_y = 0;
 }
 
-char convert_scancode(unsigned char scancode) {
-    if (handlers[scancode]) {
-        handlers[scancode]();
-        return 0;
-    } else if (scancode < 0x80) {
-        char c = shift ? scancode_to_ascii_shift[scancode] : scancode_to_ascii[scancode];
-        return c;
-    }
-
-    return 0;
-}
 
 void putc(char c) {
     VGA_MEMORY[cursor_y * 80 + cursor_x] = (0x70 << 8) | c;        
+    rb_put(&input_buffer, c);
 
-    VGA_MEMORY[prev_vga_index] = (0x07 << 8) | (VGA_MEMORY[prev_vga_index] & 0xFF);
-    prev_vga_index = cursor_y * 80 + cursor_x;
-
+    // keeping track of cursor x and y if i need it in the future
+    // (just increments the y based on whether we are at the end of line)
     cursor_x++;
     if (cursor_x >= 80) {
         cursor_y++;
@@ -104,8 +84,53 @@ void putc(char c) {
 
 }
 
-void puts(const char *str) {
-    while (*str) {
+void puts(const char *str, int len) {
+    int i = 0;
+    while (*str && i < len) {
         putc(*str++);
+        i++;
     }
+}
+
+// the only functions exposed outside of this file are here
+
+char convert_scancode(unsigned char scancode) {
+    // if the key pressed is a special key handle it properly (so far only enter, shift and backspace work)
+    if (handlers[scancode]) {
+        handlers[scancode]();
+        return 0;
+        // else if the key is a normal key and not a break code, print it according to whether shift is pressed
+    } else if (scancode < 0x80) {
+        char c = shift ? scancode_to_ascii_shift[scancode] : scancode_to_ascii[scancode];
+        return c;
+    }
+
+    return 0;
+}
+
+// TODO: add either clearing the screen at bottom right or scrolling
+int tty_write(const char *str, int len) {
+    puts(str, len);
+    return len;
+}
+
+int tty_read(char *buf, int maxlen) {
+    int i = 0;
+    while(!rb_is_empty(&input_buffer) && i < maxlen) {
+        rb_get(&input_buffer, &buf[i]);
+        i++;
+    }
+    return i; // number of chars read
+}
+
+void init_tty() {
+    clear_vga_memory();
+    rb_init(&input_buffer);
+
+    handlers[0x2A] = handle_shift_press;
+    handlers[0x36] = handle_shift_press;
+    handlers[0xAA] = handle_shift_release;
+    handlers[0xB6] = handle_shift_release;
+    handlers[0x1C] = handle_enter;
+    handlers[0x0E] = handle_backspace;
 }

@@ -26,6 +26,9 @@ void pic_init() {
 }
 
 void pic_change_irq_status(char irq, bool enable) {
+    // just basic code to reuse if i decide to expand
+    // wrapping it like this because i dont want to access pure ports every time
+    // its a pain to debug, hopefully this will make it a little harder to make a mistake
     if (irq < 8) {
         if (enable) {
             master_mask &= ~(1 << irq);
@@ -45,6 +48,7 @@ void pic_change_irq_status(char irq, bool enable) {
 }
 
 void pic_send_eoi(unsigned short irq) {
+    // sending an end of interrupt signal to the pic so it knows it has been handled
     if (irq >= 8) {
         write_port(0xA0, 0x20);
     };

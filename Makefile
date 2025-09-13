@@ -6,7 +6,7 @@ CFLAGS = -m32 -ffreestanding -Wall -Wextra
 LDFLAGS = -m elf_i386 -T link.ld
 
 BUILD_DIR = build
-SRC_DIRS = cpu drivers kernel
+SRC_DIRS = cpu drivers kernel misc
 SRC_C = $(wildcard $(addsuffix /*.c, $(SRC_DIRS)))
 SRC_ASM = $(wildcard $(addsuffix /*.asm, $(SRC_DIRS)))
 OBJ = $(addprefix $(BUILD_DIR)/, $(SRC_C:.c=.o) $(SRC_ASM:.asm=.o))
