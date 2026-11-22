@@ -17,5 +17,5 @@ void exception_handler(struct regs *r)
 {
     const char *interrupt = exception_names[r->int_no]; 
     dprintf(interrupt, 0);
-    for (;;) __asm__ volatile ("cli; hlt");
+    for (;;) __asm__ volatile ("cli; hlt"); //halt for now, TODO: extend later
 }
