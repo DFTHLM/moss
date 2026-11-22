@@ -2,7 +2,7 @@ CC = gcc
 LD = ld
 AS = nasm
 
-CFLAGS = -m32 -ffreestanding -Wall -Wextra
+CFLAGS = -m32 -ffreestanding -Wall -Wextra -g
 LDFLAGS = -m elf_i386 -T link.ld
 
 BUILD_DIR = build
@@ -28,7 +28,10 @@ moss: $(OBJ)
 	$(LD) $(LDFLAGS) -o $@ $(OBJ)
 
 run: moss
-	qemu-system-x86_64 -vga std -kernel moss -d int
+	cp moss iso/boot/moss
+	grub-mkrescue iso -o moss.iso
+	qemu-system-x86_64 -cdrom moss.iso -m 512 -d int -debugcon stdio
+
 
 clean:
 	rm -rf $(BUILD_DIR)

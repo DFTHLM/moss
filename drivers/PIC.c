@@ -25,7 +25,7 @@ void pic_init() {
     write_port(0xA1, 0xFF);
 }
 
-void pic_change_irq_status(char irq, bool enable) {
+void pic_change_irq_status(uint8_t irq, bool enable) {
     // just basic code to reuse if i decide to expand
     // wrapping it like this because i dont want to access pure ports every time
     // its a pain to debug, hopefully this will make it a little harder to make a mistake

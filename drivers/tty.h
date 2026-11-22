@@ -3,7 +3,6 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include "../misc/ring_buffer.h"
 
 extern void write_port(unsigned short port, char value);
 

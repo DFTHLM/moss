@@ -1,4 +1,3 @@
-bits 32
 section .text
         align 4
         dd 0x1BADB002            ;magic number for GRUB
@@ -15,5 +14,6 @@ start:
   hlt
 
 section .bss
-resb 0x4000
+
 stack_space:
+    resb 0x4000

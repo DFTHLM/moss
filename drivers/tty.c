@@ -16,7 +16,6 @@ static const char scancode_to_ascii_shift[128] = {
 };
 
 key_handler_t handlers[SCANCODE_MAX];
-static ring_buffer_t input_buffer;
 
 static int cursor_x = 0;
 static int cursor_y = 0;
@@ -71,8 +70,11 @@ void clear_vga_memory() {
 
 
 void putc(char c) {
-    VGA_MEMORY[cursor_y * 80 + cursor_x] = (0x70 << 8) | c;        
-    rb_put(&input_buffer, c);
+    if (c == 0x0A){
+        handle_enter();
+        return;
+    }
+    VGA_MEMORY[cursor_y * 80 + cursor_x] = (0x70 << 8) | c;
 
     // keeping track of cursor x and y if i need it in the future
     // (just increments the y based on whether we are at the end of line)
@@ -114,18 +116,8 @@ int tty_write(const char *str, int len) {
     return len;
 }
 
-int tty_read(char *buf, int maxlen) {
-    int i = 0;
-    while(!rb_is_empty(&input_buffer) && i < maxlen) {
-        rb_get(&input_buffer, &buf[i]);
-        i++;
-    }
-    return i; // number of chars read
-}
-
 void init_tty() {
     clear_vga_memory();
-    rb_init(&input_buffer);
 
     handlers[0x2A] = handle_shift_press;
     handlers[0x36] = handle_shift_press;
