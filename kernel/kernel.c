@@ -14,7 +14,7 @@ void kernel_main(void)
 
     // enable interrupts after initializing the IDT and PIC so they dont recieve them sooner
     asm volatile("sti");
-    dprintf("test", 4);
+    pic_change_irq_status(0, true);
 
     while (1) {
         asm volatile("hlt");

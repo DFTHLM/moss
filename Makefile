@@ -2,7 +2,7 @@ CC = gcc
 LD = ld
 AS = nasm
 
-CFLAGS = -m32 -ffreestanding -Wall -Wextra -g
+CFLAGS = -m32 -ffreestanding -fno-stack-protector -fno-pic -fno-pie -mno-sse -mno-sse2 -mno-mmx -mno-80387 -Wall -Wextra -g
 LDFLAGS = -m elf_i386 -T link.ld
 
 BUILD_DIR = build
