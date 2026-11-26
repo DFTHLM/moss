@@ -10,7 +10,7 @@ void idt_init_exceptions(void)
 }
 
 // a common handler for all exceptions
-// TODO: Extend for 8, 10 to 14, 17, 21, 29 and 30
+// TODO: Extend for 8, 10, 17, 21, 29 and 30
 // TODO: to handle error codes (helpful!!!!!)
 
 void selector_handler(uint32_t error) {
